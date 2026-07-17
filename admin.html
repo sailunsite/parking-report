@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>后台管理 - 车场秩序管理纪实</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: 'Microsoft YaHei','Helvetica Neue',sans-serif; background:#f1f5f9; color:#1e293b; display:flex; min-height:100vh; }
+
+.sidebar { width:240px; background:#0f172a; color:#cbd5e1; padding:20px 0; flex-shrink:0; display:flex; flex-direction:column; }
+.sidebar h2 { color:#fff; font-size:15px; padding:0 16px 16px; border-bottom:1px solid #334155; margin-bottom:8px; }
+.sidebar nav { flex:1; overflow-y:auto; }
+.sidebar nav .nav-item { display:flex; align-items:center; padding:8px 16px; color:#94a3b8; cursor:pointer; font-size:14px; border-left:3px solid transparent; transition:all .2s; gap:8px; }
+.sidebar nav .nav-item:hover, .sidebar nav .nav-item.active { color:#fff; background:#1e293b; border-left-color:#3b82f6; }
+.sidebar nav .nav-item .del-btn { margin-left:auto; color:#64748b; font-size:12px; padding:2px 6px; border-radius:4px; display:none; }
+.sidebar nav .nav-item:hover .del-btn { display:block; }
+.sidebar nav .nav-item .del-btn:hover { color:#ef4444; background:#1e293b; }
+.sidebar .add-module { margin:8px 16px; padding:8px; border:1px dashed #475569; border-radius:6px; color:#94a3b8; text-align:center; cursor:pointer; font-size:13px; transition:all .2s; }
+.sidebar .add-module:hover { border-color:#3b82f6; color:#3b82f6; }
+
+.main { flex:1; display:flex; flex-direction:column; overflow-y:auto; }
+.toolbar { background:#fff; padding:10px 20px; border-bottom:1px solid #e2e8f0; display:flex; gap:8px; align-items:center; flex-shrink:0; flex-wrap:wrap; }
+.toolbar button { padding:7px 14px; border:none; border-radius:6px; font-size:13px; cursor:pointer; font-weight:500; transition:all .2s; }
+.btn-save { background:#2563eb; color:#fff; }
+.btn-save:hover { background:#1d4ed8; }
+.btn-preview { background:#fff; color:#2563eb; border:1px solid #2563eb !important; }
+.btn-reset { background:#fef2f2; color:#dc2626; }
+.btn-export { background:#f1f5f9; color:#475569; }
+.btn-import { background:#f1f5f9; color:#475569; }
+.toolbar .status { margin-left:auto; font-size:12px; color:#64748b; }
+
+.content { padding:20px 24px; flex:1; overflow-y:auto; }
+.section { display:none; background:#fff; border-radius:8px; padding:24px; box-shadow:0 1px 3px rgba(0,0,0,.06); }
+.section.active { display:block; }
+.section h3 { font-size:17px; color:#1e3a8a; margin-bottom:16px; padding-bottom:8px; border-bottom:2px solid #e2e8f0; display:flex; align-items:center; gap:8px; }
+.section h3 .del-module { margin-left:auto; font-size:12px; color:#ef4444; cursor:pointer; border:1px solid #fca5a5; padding:4px 10px; border-radius:4px; }
+.section h3 .del-module:hover { background:#fef2f2; }
+
+.form-group { margin-bottom:14px; }
+.form-group label { display:block; font-size:12px; font-weight:600; color:#475569; margin-bottom:4px; }
+.form-group input, .form-group textarea { width:100%; padding:7px 10px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; font-family:inherit; }
+.form-group input:focus, .form-group textarea:focus { outline:none; border-color:#3b82f6; box-shadow:0 0 0 3px rgba(59,130,246,.1); }
+.form-group textarea { resize:vertical; min-height:70px; }
+
+.img-list { display:flex; flex-direction:column; gap:8px; margin-top:8px; }
+.img-item { display:flex; gap:12px; align-items:flex-start; padding:10px; background:#f8fafc; border-radius:6px; position:relative; }
+.img-item .preview { width:120px; height:90px; border-radius:4px; overflow:hidden; background:#e2e8f0; flex-shrink:0; }
+.img-item .preview img { width:100%; height:100%; object-fit:cover; }
+.img-item .info { flex:1; min-width:0; }
+.img-item .info input[type="text"] { width:100%; margin-top:4px; }
+.img-item .info input[type="file"] { font-size:12px; }
+.img-item .del-img { position:absolute; top:4px; right:4px; width:22px; height:22px; border-radius:50%; background:#ef4444; color:#fff; border:none; cursor:pointer; font-size:14px; line-height:1; display:flex; align-items:center; justify-content:center; }
+.add-img { padding:8px; border:1px dashed #cbd5e1; border-radius:6px; text-align:center; cursor:pointer; font-size:13px; color:#64748b; margin-top:8px; transition:all .2s; }
+.add-img:hover { border-color:#3b82f6; color:#3b82f6; }
+
+.toast { position:fixed; top:20px; right:20px; background:#22c55e; color:#fff; padding:10px 20px; border-radius:6px; font-size:14px; z-index:999; opacity:0; transition:opacity .3s; pointer-events:none; }
+.toast.show { opacity:1; }
+.toast.error { background:#ef4444; }
+
+@media (max-width:768px) {
+  body { flex-direction:column; }
+  .sidebar { width:100%; padding:8px; }
+  .sidebar nav { display:flex; overflow-x:auto; gap:2px; }
+  .sidebar nav .nav-item { white-space:nowrap; border-left:none; border-bottom:3px solid transparent; padding:8px 10px; font-size:12px; }
+  .img-item { flex-direction:column; }
+}
+</style>
+<!-- force-deploy-v2:1784172545-->
+</head>
+<body>
+
+<aside class="sidebar">
+  <h2>📝 内容管理</h2>
+  <nav id="navList">
+    <a class="nav-item basic-nav active" data-idx="-1">📋 基本信息</a>
+  </nav>
+  <div class="add-module" onclick="addModule()">＋ 添加新模块</div>
+</aside>
+
+<div class="main">
+  <div class="toolbar">
+    <button class="btn-save" onclick="saveAll()">💾 保存并发布</button>
+    <button class="btn-preview" onclick="preview()">👁 预览前台</button>
+    <button class="btn-export" onclick="exportData()">📥 导出</button>
+    <button class="btn-import" onclick="document.getElementById('importFile').click()">📤 导入</button>
+    <button class="btn-reset" onclick="resetAll()">🔄 恢复默认</button>
+    <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+    <span class="status" id="status">Ready</span>
+  </div>
+
+  <div class="content" id="formContent">
+    <!-- 基本信息 Section (static) -->
+    <div class="section active" id="section-basic">
+      <h3>📋 页面基本信息</h3>
+      <div class="form-group"><label>主标题</label><input id="field-title" value=""></div>
+      <div class="form-group"><label>副标题</label><input id="field-subtitle" value=""></div>
+      <div class="form-group"><label>日期</label><input id="field-date" value=""></div>
+      <div class="form-group"><label>导语</label><textarea id="field-intro" rows="5"></textarea></div>
+    </div>
+    <!-- Module sections dynamically inserted here -->
+    <div id="moduleSections"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ============ DEFAULT DATA ============
+const DEFAULT_ICONS = [
+  `<svg width="36" height="36" viewBox="0 0 48 48" style="vertical-align:middle;margin-right:6px;"><g transform="translate(4,22) rotate(-15)"><rect x="0" y="2" width="20" height="10" rx="4" fill="#ef4444" stroke="#b91c1c" stroke-width="1.5"/><rect x="14" y="0" width="8" height="6" rx="2" fill="#fca5a5" stroke="#b91c1c" stroke-width="1"/><circle cx="5" cy="13" r="3" fill="#1e293b"/><circle cx="16" cy="13" r="3" fill="#1e293b"/><rect x="7" y="5" width="5" height="4" rx="1" fill="#bcd9f5"/></g><g transform="translate(24,18)"><rect x="0" y="4" width="18" height="9" rx="4" fill="#f97316" stroke="#c2410c" stroke-width="1.5"/><rect x="12" y="2" width="7" height="5" rx="2" fill="#fed7aa" stroke="#c2410c" stroke-width="1"/><circle cx="4" cy="14" r="2.5" fill="#1e293b"/><circle cx="14" cy="14" r="2.5" fill="#1e293b"/><rect x="6" y="6" width="4" height="3" rx="1" fill="#bcd9f5"/></g><circle cx="38" cy="10" r="8" fill="#ef4444" opacity="0.9"/><line x1="33" y1="14" x2="43" y2="6" stroke="white" stroke-width="2.5" stroke-linecap="round"/></svg>`,
+  `<svg width="36" height="36" viewBox="0 0 48 48" style="vertical-align:middle;margin-right:6px;"><rect x="2" y="18" width="28" height="14" rx="5" fill="#3b82f6" stroke="#1d4ed8" stroke-width="1.5"/><rect x="18" y="12" width="14" height="8" rx="3" fill="#93c5fd" stroke="#1d4ed8" stroke-width="1.5"/><circle cx="7" cy="33" r="4" fill="#1e293b"/><circle cx="24" cy="33" r="4" fill="#1e293b"/><circle cx="24" cy="20" r="5" fill="#fcd34d"/><circle cx="22" cy="18" r="1" fill="#1e293b"/><circle cx="26" cy="18" r="1" fill="#1e293b"/><path d="M22 23 Q24 26 26 23" stroke="#1e293b" stroke-width="1" fill="none"/><circle cx="42" cy="26" r="5" fill="#fcd34d"/><rect x="40" y="31" width="9" height="10" rx="2" fill="#fbbf24"/><rect x="41" y="34" width="7" height="2" rx="1" fill="#22c55e"/><rect x="41" y="38" width="7" height="2" rx="1" fill="#22c55e"/><rect x="40" y="20" width="9" height="4" rx="1" fill="#1e293b"/><rect x="38" y="23" width="13" height="2" rx="1" fill="#1e293b"/></svg>`,
+  `<svg width="36" height="36" viewBox="0 0 48 48" style="vertical-align:middle;margin-right:6px;"><circle cx="24" cy="12" r="6" fill="#fcd34d"/><rect x="20" y="18" width="12" height="16" rx="3" fill="#fbbf24"/><rect x="21" y="22" width="10" height="3" rx="1" fill="#22c55e"/><rect x="21" y="27" width="10" height="3" rx="1" fill="#22c55e"/><rect x="20" y="5" width="12" height="5" rx="2" fill="#1e293b"/><rect x="18" y="9" width="16" height="2" rx="1" fill="#1e293b"/><line x1="26" y1="22" x2="40" y2="6" stroke="#fcd34d" stroke-width="4" stroke-linecap="round"/><circle cx="42" cy="4" r="3" fill="#fcd34d"/><line x1="24" y1="24" x2="10" y2="32" stroke="#fcd34d" stroke-width="3.5" stroke-linecap="round"/><line x1="24" y1="34" x2="22" y2="44" stroke="#1e293b" stroke-width="3" stroke-linecap="round"/><line x1="28" y1="34" x2="30" y2="44" stroke="#1e293b" stroke-width="3" stroke-linecap="round"/></svg>`
+];
+
+const DEFAULT_ICON_GENERIC = `<svg width="36" height="36" viewBox="0 0 48 48" style="vertical-align:middle;margin-right:6px;"><rect x="8" y="10" width="32" height="28" rx="5" fill="#6366f1" stroke="#4f46e5" stroke-width="1.5"/><rect x="14" y="16" width="20" height="4" rx="2" fill="#a5b4fc"/><rect x="14" y="24" width="14" height="3" rx="1.5" fill="#a5b4fc"/><circle cx="34" cy="25.5" r="5" fill="#fcd34d"/></svg>`;
+
+const DEFAULT_DATA = {
+  title: '全天候"在线" 守护"菜篮子"畅通',
+  subtitle: '——北京鲜活农产品流通中心车场秩序管理纪实',
+  date: '2026年7月16日',
+  intro: '凌晨3点，当城市还在沉睡，北京鲜活农产品流通中心的二层交易区已是车流不息。作为首都的"菜篮子"，园区的车辆停放秩序直接关系到市场的运营效率与安全。为保障园区道路交通顺畅，停车管理团队实行24小时轮班巡查机制。管理员们采取"疏堵结合"的管理方式：一方面，对违停在交易区坡道、三通通等关键路段的车辆及时进行劝离，消除安全隐患；另一方面，主动在环道节点进行手势引导，确保车辆按标识行驶、有序停放。本组图片记录了2026年7月16日凌晨至清晨时段，一线管理员坚守岗位、维护园内车辆秩序的生动瞬间。',
+  modules: [
+    {
+      title: '违规停放乱象',
+      desc: '凌晨时段，交易区三通通路口频现违规停车，白色货车与私家车占据通道，形成交通瓶颈，严重影响车场整体通行效率。',
+      icon: DEFAULT_ICONS[0],
+      imgs: [
+        { src: 'img6.jpg', base64: '', caption: '<strong>【凌晨路口违停拥堵】</strong> 多辆货车与轿车违规停放在三通通通道上。' },
+        { src: 'img7.jpg', base64: '', caption: '<strong>【白色冷藏货车路口占道】</strong> 路口违规停车，形成交通拥堵隐患。' }
+      ]
+    },
+    {
+      title: '巡查及时劝离',
+      desc: '管理人员全天候轮班巡逻，身穿黄黑反光背心，在坡道、环道等关键节点及时劝阻违停车辆，耐心沟通，消除拥堵隐患。',
+      icon: DEFAULT_ICONS[1],
+      imgs: [
+        { src: 'img1.jpg', base64: '', caption: '<strong>【清晨坡道劝离面包车】</strong> 清晨 05:57，管理员在西侧坡道劝离银色面包车。' },
+        { src: 'img3.jpg', base64: '', caption: '<strong>【清晨环道劝离私家车】</strong> 清晨 05:33，管理员成功劝离占用通道的违停私家车。' },
+        { src: 'img5.jpg', base64: '', caption: '<strong>【夜间三通通劝离黑车】</strong> 凌晨 03:36，管理员在车里门边耐心劝导司机驶离。' }
+      ]
+    },
+    {
+      title: '主动疏导引导',
+      desc: '为保障市场交通有序循环，管理人员主动靠前指挥，引导车辆按道路标识规范行驶，并精准指挥车辆停入指定车位。',
+      icon: DEFAULT_ICONS[2],
+      imgs: [
+        { src: 'img2.jpg', base64: '', caption: '<strong>【手势引导按标行驶】</strong> 清晨 05:38，管理员在环道指引车辆按道路标识正常行驶。' },
+        { src: 'img4.jpg', base64: '', caption: '<strong>【夜间指挥停入车位】</strong> 凌晨 03:45，夜班管理员主动指挥白色SUV安全停入指定车位。' }
+      ]
+    }
+  ]
+};
+
+// ============ STATE ============
+let state = JSON.parse(JSON.stringify(DEFAULT_DATA));
+let activeIdx = -1; // -1 = basic info
+
+// ============ RENDER ============
+function renderAll() {
+  renderNav();
+  renderSections();
+  loadBasicFields();
+}
+
+function renderNav() {
+  const nav = document.getElementById('navList');
+  // Keep basic nav
+  nav.innerHTML = '<a class="nav-item basic-nav' + (activeIdx === -1 ? ' active' : '') + '" data-idx="-1">📋 基本信息</a>';
+  state.modules.forEach((m, i) => {
+    const div = document.createElement('a');
+    div.className = 'nav-item' + (activeIdx === i ? ' active' : '');
+    div.dataset.idx = i;
+    div.innerHTML = '<span>' + (m.title || '模块 ' + (i+1)) + '</span><span class="del-btn" data-action="del">✕</span>';
+    nav.appendChild(div);
+  });
+  
+  // Bind events
+  nav.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', function(e) {
+      if (e.target.closest('[data-action="del"]')) {
+        e.stopPropagation();
+        deleteModule(parseInt(this.dataset.idx));
+        return;
+      }
+      switchModule(parseInt(this.dataset.idx));
+    });
+  });
+}
+
+function renderSections() {
+  const container = document.getElementById('moduleSections');
+  container.innerHTML = '';
+  
+  state.modules.forEach((m, mi) => {
+    const sec = document.createElement('div');
+    sec.className = 'section' + (activeIdx === mi ? ' active' : '');
+    sec.id = 'section-module-' + mi;
+    
+    let html = '<h3><span class="mod-icon">' + (m.icon || DEFAULT_ICON_GENERIC) + '</span>';
+    html += '<span class="mod-label">模块 ' + (mi+1) + '</span>';
+    html += '<span class="del-module" onclick="deleteModule(' + mi + ')">🗑 删除此模块</span></h3>';
+    
+    html += '<div class="form-group"><label>模块标题</label><input id="mod-' + mi + '-title" value="' + escHtml(m.title) + '" oninput="updateModuleField(' + mi + ',\'title\',this.value)"></div>';
+    html += '<div class="form-group"><label>模块描述</label><textarea id="mod-' + mi + '-desc" rows="2" oninput="updateModuleField(' + mi + ',\'desc\',this.value)">' + escHtml(m.desc) + '</textarea></div>';
+    
+    html += '<label style="font-size:12px;font-weight:600;color:#475569;">图片列表 (' + m.imgs.length + ' 张)</label>';
+    html += '<div class="img-list" id="img-list-' + mi + '">';
+    m.imgs.forEach((img, ii) => {
+      html += renderImgItem(mi, ii, img);
+    });
+    html += '</div>';
+    html += '<div class="add-img" onclick="addImage(' + mi + ')">＋ 添加图片</div>';
+    
+    sec.innerHTML = html;
+    container.appendChild(sec);
+  });
+}
+
+function renderImgItem(mi, ii, img) {
+  const previewSrc = img.base64 || img.src;
+  return '<div class="img-item" id="img-item-' + mi + '-' + ii + '">' +
+    '<div class="preview"><img src="' + previewSrc + '" onerror="this.style.display=\'none\'"></div>' +
+    '<div class="info">' +
+      '<input type="file" accept="image/*" onchange="uploadImg(this,' + mi + ',' + ii + ')" style="margin-bottom:4px">' +
+      '<input type="text" value="' + escHtml(img.caption) + '" oninput="updateImgField(' + mi + ',' + ii + ',\'caption\',this.value)" placeholder="图片说明文字">' +
+    '</div>' +
+    '<button class="del-img" onclick="deleteImage(' + mi + ',' + ii + ')" title="删除此图">✕</button>' +
+  '</div>';
+}
+
+function escHtml(s) {
+  if (!s) return '';
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ============ ACTIONS ============
+
+function collectCurrentModule() {
+  if (activeIdx < 0) {
+    // basic fields
+    state.title = document.getElementById('field-title').value;
+    state.subtitle = document.getElementById('field-subtitle').value;
+    state.date = document.getElementById('field-date').value;
+    state.intro = document.getElementById('field-intro').value;
+    return;
+  }
+  var mi = activeIdx;
+  var titleEl = document.getElementById('mod-' + mi + '-title');
+  var descEl = document.getElementById('mod-' + mi + '-desc');
+  if (titleEl) state.modules[mi].title = titleEl.value;
+  if (descEl) state.modules[mi].desc = descEl.value;
+  // imgs are updated in real-time via oninput/onchange
+}
+
+function switchModule(idx) {
+  // Save current module's form data before switching
+  collectCurrentModule();
+  activeIdx = idx;
+  renderAll();
+  if (idx >= 0) {
+    document.getElementById('section-basic').classList.remove('active');
+  } else {
+    document.getElementById('section-basic').classList.add('active');
+  }
+  setStatus('');
+}
+
+function addModule() {
+  const newMod = {
+    title: '新模块',
+    desc: '',
+    icon: DEFAULT_ICON_GENERIC,
+    imgs: [{ src: '', base64: '', caption: '' }]
+  };
+  state.modules.push(newMod);
+  activeIdx = state.modules.length - 1;
+  renderAll();
+  document.getElementById('section-basic').classList.remove('active');
+  setStatus('已添加新模块');
+}
+
+function deleteModule(idx) {
+  collectCurrentModule();
+  if (state.modules.length <= 1) {
+    showToast('至少保留一个模块', true);
+    return;
+  }
+  if (!confirm('确定删除模块 "' + (state.modules[idx].title || '模块'+(idx+1)) + '"？')) return;
+  state.modules.splice(idx, 1);
+  if (activeIdx >= state.modules.length) activeIdx = state.modules.length - 1;
+  if (activeIdx < -1) activeIdx = -1;
+  renderAll();
+  if (activeIdx >= 0) document.getElementById('section-basic').classList.remove('active');
+  else document.getElementById('section-basic').classList.add('active');
+  setStatus('模块已删除');
+}
+
+function addImage(mi) {
+  collectCurrentModule();
+  state.modules[mi].imgs.push({ src: '', base64: '', caption: '' });
+  renderAll();
+  document.getElementById('section-basic').classList.remove('active');
+  document.getElementById('section-module-' + mi).classList.add('active');
+  setStatus('已添加图片');
+}
+
+function deleteImage(mi, ii) {
+  collectCurrentModule();
+  if (state.modules[mi].imgs.length <= 1) {
+    showToast('每个模块至少保留一张图片', true);
+    return;
+  }
+  state.modules[mi].imgs.splice(ii, 1);
+  renderAll();
+  document.getElementById('section-basic').classList.remove('active');
+  document.getElementById('section-module-' + mi).classList.add('active');
+  setStatus('图片已删除');
+}
+
+function updateModuleField(mi, field, value) {
+  state.modules[mi][field] = value;
+  // Update nav label
+  const navItems = document.querySelectorAll('#navList .nav-item');
+  if (field === 'title' && navItems[mi+1]) {
+    navItems[mi+1].querySelector('span').textContent = value || '模块 ' + (mi+1);
+  }
+  setStatus('有未保存的修改');
+}
+
+function updateImgField(mi, ii, field, value) {
+  state.modules[mi].imgs[ii][field] = value;
+  setStatus('有未保存的修改');
+}
+
+function uploadImg(input, mi, ii) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    state.modules[mi].imgs[ii].base64 = e.target.result;
+    // Update preview in current rendering
+    const preview = document.querySelector('#img-item-' + mi + '-' + ii + ' .preview img');
+    if (preview) { preview.src = e.target.result; preview.style.display = ''; }
+  };
+  reader.readAsDataURL(file);
+}
+
+// ============ BASIC FIELDS ============
+function loadBasicFields() {
+  document.getElementById('field-title').value = state.title;
+  document.getElementById('field-subtitle').value = state.subtitle;
+  document.getElementById('field-date').value = state.date;
+  document.getElementById('field-intro').value = state.intro;
+}
+
+function collectBasicFields() {
+  state.title = document.getElementById('field-title').value;
+  state.subtitle = document.getElementById('field-subtitle').value;
+  state.date = document.getElementById('field-date').value;
+  state.intro = document.getElementById('field-intro').value;
+}
+
+// ============ SAVE / PREVIEW / EXPORT / IMPORT ============
+function saveAll() {
+  collectBasicFields();
+  localStorage.setItem('parking_report_data', JSON.stringify(state));
+  showToast('✅ 已保存！前台刷新即可看到更新');
+  setStatus('已保存');
+}
+
+function preview() {
+  saveAll();
+  window.open('index.html', '_blank');
+}
+
+function exportData() {
+  collectBasicFields();
+  const blob = new Blob([JSON.stringify(state, null, 2)], {type: 'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'parking-report-config.json'; a.click();
+  URL.revokeObjectURL(url);
+  showToast('📥 配置已下载');
+}
+
+function importData(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    try {
+      const data = JSON.parse(ev.target.result);
+      if (!data.modules || !Array.isArray(data.modules)) throw new Error('Invalid format');
+      state = data;
+      activeIdx = -1;
+      renderAll();
+      saveAll();
+      showToast('📤 配置已导入');
+    } catch(err) {
+      showToast('❌ 文件格式错误', true);
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+
+function resetAll() {
+  if (!confirm('确定恢复为默认内容？所有修改将丢失。')) return;
+  state = JSON.parse(JSON.stringify(DEFAULT_DATA));
+  activeIdx = -1;
+  localStorage.removeItem('parking_report_data');
+  renderAll();
+  document.getElementById('section-basic').classList.add('active');
+  setStatus('已恢复默认');
+}
+
+// ============ HELPERS ============
+function showToast(msg, isError) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'toast show' + (isError ? ' error' : '');
+  clearTimeout(t._timeout);
+  t._timeout = setTimeout(() => t.className = 'toast', 2500);
+}
+
+function setStatus(msg) {
+  document.getElementById('status').textContent = msg || 'Ready';
+}
+
+// Auto-save on basic field change
+['field-title','field-subtitle','field-date','field-intro'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener('input', () => setStatus('有未保存的修改'));
+});
+
+// ============ INIT ============
+(function init() {
+  const saved = localStorage.getItem('parking_report_data');
+  if (saved) {
+    try {
+      const data = JSON.parse(saved);
+      if (data.modules && Array.isArray(data.modules)) {
+        state = data;
+      }
+    } catch(e) {}
+  }
+  renderAll();
+  document.getElementById('section-basic').classList.add('active');
+  setStatus(saved ? '已加载保存的配置' : '');
+})();
+</script>
+</body>
+</html>
