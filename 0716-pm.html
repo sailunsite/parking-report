@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>北京鲜活农产品流通中心车场秩序管理纪实</title>
+    <style>
+        /* 基础重置与字体设定 */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            background-color: #f4f5f7; 
+            font-family: 'Helvetica Neue', Helvetica, Arial, 'Microsoft YaHei', sans-serif;
+            color: #333;
+            padding: 40px 20px;
+        }
+        /* 报纸主体容器 */
+        .newspaper-container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 50px 60px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            border-radius: 8px;
+            border: 1px solid #e5e5e5;
+        }
+
+        /* --- 报头区域 --- */
+        .header { text-align: center; border-bottom: 4px double #1e3a8a; padding-bottom: 25px; margin-bottom: 30px; }
+        .header h1 { font-size: 32px; color: #1e3a8a; letter-spacing: 2px; margin-bottom: 8px; }
+        .header h2 { font-size: 16px; color: #666; font-weight: normal; letter-spacing: 1px; margin-bottom: 5px; }
+        .header .date { font-size: 14px; color: #999; text-align: right; margin-top: 10px; }
+
+        /* --- 导语区域 --- */
+        .intro-section { margin-bottom: 40px; background: #f8fafc; padding: 20px 25px; border-left: 6px solid #2563eb; border-radius: 4px; }
+        .intro-section p { font-size: 15px; line-height: 1.8; color: #4b5563; text-align: justify; text-indent: 2em; }
+
+        /* --- 三大展示模块 --- */
+        .module { margin-bottom: 50px; }
+        .module-title { background: #1e3a8a; display:flex; align-items:center; color: #fff; display: inline-block; padding: 8px 20px; font-size: 18px; font-weight: bold; border-radius: 4px; margin-bottom: 10px; }
+        .module-desc { font-size: 15px; color: #475569; margin-bottom: 20px; border-bottom: 1px dashed #d1d5db; padding-bottom: 10px; }
+
+        /* 图片网格系统 */
+        .image-grid {
+            display: grid;
+            gap: 25px;
+        }
+        .grid-2 { grid-template-columns: repeat(2, 1fr); }
+        .grid-3 { grid-template-columns: repeat(3, 1fr); }
+
+        /* 图片卡片样式 */
+        .img-card { background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 6px; overflow: hidden; }
+        .img-card img, .img-placeholder {
+            width: 100%;
+            height: 280px;
+            object-fit: cover;
+            display: block;
+            background: #d1d5db;
+            color: #6b7280;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        /* 这里的样式用于显示占位符，当你换成真实图片后，自动替代 */
+        .img-placeholder { background: #e5e7eb; color: #9ca3af; }
+        
+        .img-caption { padding: 12px 15px; font-size: 14px; color: #374151; background: #fff; border-top: 1px solid #e5e7eb; }
+        .img-caption strong { color: #2563eb; margin-right: 8px; }
+
+        /* --- 响应式适配 --- */
+        @media (max-width: 768px) {
+            .newspaper-container { padding: 20px; }
+            .grid-2, .grid-3 { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 480px) {
+            .header h1 { font-size: 24px; }
+        }
+    
+        /* --- 灯箱弹窗（纯JS渲染，CSS仅辅助） --- */
+
+    </style>
+</head>
+<body>
+
+
+<div class="newspaper-container">
+
+    <!-- 1. 顶部报头 -->
+    <header class="header">
+        <h1 id="dyn-title">全天候“在线” 守护“菜篮子”畅通</h1>
+        <h2 id="dyn-subtitle">——北京鲜活农产品流通中心车场秩序管理纪实</h2>
+        <div class="date" id="dyn-date">2026年7月16日</div>
+    </header>
+
+    <!-- 2. 导语文章区 -->
+    <section class="intro-section">
+        <p id="dyn-intro">凌晨3点，当城市还在沉睡，北京鲜活农产品流通中心的二层交易区已是车流不息。作为首都的“菜篮子”，园区的车辆停放秩序直接关系到市场的运营效率与安全。为保障园区道路交通顺畅，停车管理团队实行24小时轮班巡查机制。管理员们采取“疏堵结合”的管理方式：一方面，对违停在交易区坡道、三通通等关键路段的车辆及时进行劝离，消除安全隐患；另一方面，主动在环道节点进行手势引导，确保车辆按标识行驶、有序停放。本组图片记录了2026年7月16日凌晨至清晨时段，一线管理员坚守岗位、维护园内车辆秩序的生动瞬间。</p>
+    </section>
+
+    <div id="modules-container"></div>
+</div>
+
+
+<script>
+(function(){
+  var DEFAULT_ICONS = ['<svg width="36" height="36" viewBox="0 0 48 48" style="vertical-align:middle;margin-right:6px;"><g transform="translate(4,22) rotate(-15)"><rect x="0" y="2" width="20" height="10" rx="4" fill="#ef4444" stroke="#b91c1c" stroke-width="1.5"/><rect x="14" y="0" width="8" height="6" rx="2" fill="#fca5a5" stroke="#b91c1c" stroke-width="1"/><circle cx="5" cy="13" r="3" fill="#1e293b"/><circle cx="16" cy="13" r="3" fill="#1e293b"/><rect x="7" y="5" width="5" height="4" rx="1" fill="#bcd9f5"/></g><g transform="translate(24,18)"><rect x="0" y="4" width="18" height="9" rx="4" fill="#f97316" stroke="#c2410c" stroke-width="1.5"/><rect x="12" y="2" width="7" height="5" rx="2" fill="#fed7aa" stroke="#c2410c" stroke-width="1"/><circle cx="4" cy="14" r="2.5" fill="#1e293b"/><circle cx="14" cy="14" r="2.5" fill="#1e293b"/><rect x="6" y="6" width="4" height="3" rx="1" fill="#bcd9f5"/></g><circle cx="38" cy="10" r="8" fill="#ef4444" opacity="0.9"/><line x1="33" y1="14" x2="43" y2="6" stroke="white" stroke-width="2.5" stroke-linecap="round"/></svg>',
+  '<svg width="36" height="36" viewBox="0 0 48 48" style="vertical-align:middle;margin-right:6px;"><rect x="2" y="18" width="28" height="14" rx="5" fill="#3b82f6" stroke="#1d4ed8" stroke-width="1.5"/><rect x="18" y="12" width="14" height="8" rx="3" fill="#93c5fd" stroke="#1d4ed8" stroke-width="1.5"/><circle cx="7" cy="33" r="4" fill="#1e293b"/><circle cx="24" cy="33" r="4" fill="#1e293b"/><circle cx="24" cy="20" r="5" fill="#fcd34d"/><circle cx="22" cy="18" r="1" fill="#1e293b"/><circle cx="26" cy="18" r="1" fill="#1e293b"/><path d="M22 23 Q24 26 26 23" stroke="#1e293b" stroke-width="1" fill="none"/><circle cx="42" cy="26" r="5" fill="#fcd34d"/><rect x="40" y="31" width="9" height="10" rx="2" fill="#fbbf24"/><rect x="41" y="34" width="7" height="2" rx="1" fill="#22c55e"/><rect x="41" y="38" width="7" height="2" rx="1" fill="#22c55e"/><rect x="40" y="20" width="9" height="4" rx="1" fill="#1e293b"/><rect x="38" y="23" width="13" height="2" rx="1" fill="#1e293b"/></svg>',
+  '<svg width="36" height="36" viewBox="0 0 48 48" style="vertical-align:middle;margin-right:6px;"><circle cx="24" cy="12" r="6" fill="#fcd34d"/><rect x="20" y="18" width="12" height="16" rx="3" fill="#fbbf24"/><rect x="21" y="22" width="10" height="3" rx="1" fill="#22c55e"/><rect x="21" y="27" width="10" height="3" rx="1" fill="#22c55e"/><rect x="20" y="5" width="12" height="5" rx="2" fill="#1e293b"/><rect x="18" y="9" width="16" height="2" rx="1" fill="#1e293b"/><line x1="26" y1="22" x2="40" y2="6" stroke="#fcd34d" stroke-width="4" stroke-linecap="round"/><circle cx="42" cy="4" r="3" fill="#fcd34d"/><line x1="24" y1="24" x2="10" y2="32" stroke="#fcd34d" stroke-width="3.5" stroke-linecap="round"/><line x1="24" y1="34" x2="22" y2="44" stroke="#1e293b" stroke-width="3" stroke-linecap="round"/><line x1="28" y1="34" x2="30" y2="44" stroke="#1e293b" stroke-width="3" stroke-linecap="round"/></svg>'];
+  var DEFAULT_ICON_GENERIC = '<svg width="36" height="36" viewBox="0 0 48 48" style="vertical-align:middle;margin-right:6px;"><rect x="8" y="10" width="32" height="28" rx="5" fill="#6366f1" stroke="#4f46e5" stroke-width="1.5"/><rect x="14" y="16" width="20" height="4" rx="2" fill="#a5b4fc"/><rect x="14" y="24" width="14" height="3" rx="1.5" fill="#a5b4fc"/><circle cx="34" cy="25.5" r="5" fill="#fcd34d"/></svg>';
+
+  function esc(s) { if (!s) return ''; return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+  var raw = localStorage.getItem('parking_report_data');
+  var data = null;
+  if (raw) { try { data = JSON.parse(raw); } catch(e) {} }
+  if (!data || !data.modules || !Array.isArray(data.modules)) {
+    // Fallback: load embedded site data (synced from admin edits)
+    try {
+      data = JSON.parse('{"title": "日间在线巡查 护航菜篮畅通", "subtitle": "——北京鲜活农产品流通中心7月16日白班停车秩序保障纪实", "date": "2026年7月16日", "intro": "2026年7月16日，烈日下的北京鲜活农产品流通中心交易区二楼车辆穿梭不息。面对日间车流高峰与酷暑高温（29℃-33℃），停车管理团队坚守一线，开展全天候、高频次的动态巡查。管理员马永生以“发现即处理”的高效执行力，在重点路段针对车辆逆行等安全隐患果断出手干预，同时对各类违停占道车辆进行耐心的文明劝离。本次巡检有效疏通了市场内部交通的“微循环”，充分展现了管理团队在复杂车流下守护园区交通安全、保障商户经营畅通的责任与担当。", "modules": [{"title": "占道停放事例", "desc": "针对日间车流量大的特点，巡查员对冷藏货车等重点运输车辆进行引导；同时对存在“逆行”等危险驾驶行为的车辆进行及时拦截与手势指挥，确保车辆按标识单向行驶。", "imgs": [{"src": "img6.jpg", "base64": "", "caption": "交易区二层西北角路中间，临时占用车道的黑色轿车"}]}, {"title": "巡查及时劝离", "desc": "执勤人员全天倒班巡逻，穿着醒目的黄黑反光衣，在坡道和环岛等容易堵车的地方，看到违停就马上上前劝阻，好好跟司机说明情况，把拥堵苗头及时化解掉。", "imgs": [{"src": "img5.jpg", "base64": "", "caption": "上午9:50，管理员引导逆行车辆回到正确路线上"}, {"src": "img3.jpg", "base64": "", "caption": "上午10：46，管理员劝离二层北侧车道占道车辆"}, {"src": "img_user_m2_4.jpg", "base64": "", "caption": "中午12:30，管理员劝离斜停占道车辆"}, {"src": "img_user_m2_3.jpg", "base64": "", "caption": "中午12:51，管理员劝离占道车辆"}]}, {"title": "主动疏导引导", "desc": "为保障市场交通有序循环，管理人员主动靠前指挥，引导车辆按道路标识规范行驶，并精准指挥车辆停入指定车位。", "imgs": [{"src": "img2.jpg", "base64": "", "caption": "上午9:55，车辆管理人员站在交易区二层3-1西北侧路口引导车辆"}, {"src": "img4.jpg", "base64": "", "caption": "中午12:56，管理员指引即将逆行车厢回到正确路线"}]}]}');
+      if (!data.modules || !Array.isArray(data.modules)) throw new Error('invalid');
+      data.modules = data.modules.map(function(m) {
+        m.icon = (typeof m.icon === 'number' && m.icon < DEFAULT_ICONS.length) ? DEFAULT_ICONS[m.icon] : (m.icon || DEFAULT_ICON_GENERIC);
+        return m;
+      });
+    } catch(e) {
+      console.log('Fallback data load failed');
+      return;
+    }
+  }
+
+  // Update header
+  if (data.title) document.getElementById('dyn-title').textContent = data.title;
+  if (data.subtitle) document.getElementById('dyn-subtitle').textContent = data.subtitle;
+  if (data.date) document.getElementById('dyn-date').textContent = data.date;
+  if (data.intro) document.getElementById('dyn-intro').textContent = data.intro;
+
+  // Render modules dynamically
+  var container = document.getElementById('modules-container');
+  if (!container) return;
+
+  var html = '';
+  data.modules.forEach(function(mod) {
+    var imgCount = (mod.imgs || []).length;
+    var gridClass = imgCount <= 2 || imgCount === 4 ? 'grid-2' : 'grid-3';
+
+    html += '<section class="module">';
+    html += '<div class="module-title">' + (mod.icon || DEFAULT_ICON_GENERIC) + ' <span class="tt">' + esc(mod.title) + '</span></div>';
+    html += '<div class="module-desc">' + esc(mod.desc) + '</div>';
+    html += '<div class="image-grid ' + gridClass + '">';
+
+    (mod.imgs || []).forEach(function(img) {
+      var src = img.base64 || img.src || '';
+      if (src && src.indexOf('data:') !== 0) src += '?v=20260716';
+      html += '<div class="img-card"><a href="' + src + '" target="_blank"><img src="' + src + '" style="width:100%;height:280px;object-fit:cover;display:block;" width="400" height="300" onerror="this.src=\'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22300%22><rect fill=%22%23e2e8f0%22 width=%22400%22 height=%22300%22/><text x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%2394a3b8%22 font-size=%2216%22>\u56fe\u7247\u52a0\u8f7d\u4e2d...</text></svg>\'"></a><div class="img-caption">' + (img.caption || '') + '</div></div>';
+    });
+
+    html += '</div></section>';
+  });
+
+  container.innerHTML = html;
+
+  // Lightbox function (pure JS, WeChat compatible)
+  window.openLightbox = function(src) {
+    var overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.92);z-index:99999;display:flex;align-items:center;justify-content:center;';
+    overlay.onclick = function() { document.body.removeChild(overlay); };
+    
+    var img = document.createElement('img');
+    img.src = src;
+    img.style.cssText = 'max-width:95vw;max-height:95vh;object-fit:contain;border-radius:4px;';
+    overlay.appendChild(img);
+    document.body.appendChild(overlay);
+  };
+})();</script>
+
+</body>
+</html>

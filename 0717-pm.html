@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>发布测试</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Microsoft YaHei','Helvetica Neue',sans-serif; background:#f1f5f9; color:#1e293b; padding:40px 20px; min-height:100vh; }
+.container { max-width:1100px; margin:0 auto; }
+.header { text-align:center; margin-bottom:30px; background:#fff; padding:40px 40px 30px; border-radius:10px; box-shadow:0 1px 3px rgba(0,0,0,.05); }
+.header h1 { font-size:26px; color:#1e3a8a; margin-bottom:6px; }
+.header h2 { font-size:15px; color:#64748b; font-weight:normal; margin-bottom:12px; }
+.header .date { font-size:13px; color:#94a3b8; }
+.header .period-badge { display:inline-block; background:#2563eb; color:#fff; font-size:12px; padding:3px 12px; border-radius:12px; margin-bottom:10px; }
+
+.intro { background:#fff; padding:22px 28px; border-left:4px solid #2563eb; border-radius:8px; margin-bottom:30px; box-shadow:0 1px 3px rgba(0,0,0,.05); }
+.intro p { font-size:15px; line-height:2; color:#475569; text-align:justify; text-indent:2em; }
+
+.module { margin-bottom:40px; }
+.module-title { background:#1e3a8a; color:#fff; display:inline-block; padding:7px 18px; font-size:17px; font-weight:bold; border-radius:4px; margin-bottom:8px; }
+.module-desc { font-size:14px; color:#64748b; margin-bottom:18px; padding-bottom:10px; border-bottom:1px dashed #cbd5e1; }
+
+.image-grid { display:grid; gap:20px; }
+.grid-2 { grid-template-columns:repeat(2,1fr); }
+.grid-3 { grid-template-columns:repeat(3,1fr); }
+
+.img-card { background:#fff; border-radius:8px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,.05); border:1px solid #e2e8f0; }
+.img-card img { width:100%; height:260px; object-fit:cover; display:block; cursor:pointer; }
+.img-caption { padding:12px 15px; font-size:14px; color:#334155; background:#f8fafc; border-top:1px solid #e2e8f0; }
+.img-caption strong { color:#2563eb; margin-right:6px; }
+
+.back-link { display:block; text-align:center; margin-top:40px; padding:20px; }
+.back-link a { color:#2563eb; font-size:15px; text-decoration:none; }
+
+/* Lightbox */
+.lightbox { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,.92); z-index:9999; cursor:pointer; }
+.lightbox img { max-width:95vw; max-height:95vh; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); object-fit:contain; }
+
+@media(max-width:768px) {
+  body { padding:20px 10px; }
+  .header { padding:25px 15px 20px; }
+  .header h1 { font-size:22px; }
+  .grid-2,.grid-3 { grid-template-columns:1fr; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <span class="period-badge" style="background:#2563eb">白天时段</span>
+    <h1>发布测试</h1>
+    <h2>测试</h2>
+    <div class="date">2026-07-17</div>
+  </div>
+
+  <div class="intro"><p>测试发布功能</p></div>
+
+  
+
+  <div class="back-link">
+    <a href="/">← 返回报告列表</a>
+    <br><br>
+    <a href="admin.html">后台管理</a>
+  </div>
+</div>
+
+<div class="lightbox" id="lightbox" onclick="this.style.display='none'">
+  <img id="lightbox-img" src="">
+</div>
+<script>
+function openLightbox(src) {
+  document.getElementById('lightbox-img').src = src;
+  document.getElementById('lightbox').style.display = 'block';
+}
+</script>
+</body>
+</html>
